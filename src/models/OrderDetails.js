@@ -29,7 +29,7 @@ orderDetailSchema.statics.createOrderDetail = async function(orderDetail) {
 
 orderDetailSchema.statics.getOrderDetail = async function(orderDetailId) {
   return await 
-    this.findOne(ObjectId(orderDetailId))
+    this.findOne(ObjectId(orderDetailId), {_id: 0, __v: 0})
     .populate({path: 'productId', model: productModel, select: 'productName category'})
     .populate({path: 'voucher.voucherId', model: SaleEventModel, select: 'eventName discountCode description'});
 }

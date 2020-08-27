@@ -5,13 +5,13 @@ const discountByProduct = function (listOrderDetail, voucher) {
   const orderDetail = listOrderDetail.find( product => String(voucher.requirement.product.productId) === String(product.productId));
 
   if (voucher.requirement.product.minQuantity) {
-    if (voucher.requirement.product.minQuantity > orderDetail.quantity) return "So luong san pham khong du yeu cau"
+    if (voucher.requirement.product.minQuantity > orderDetail.quantity) return `${voucher.discountCode}: So luong san pham khong du yeu cau`
   }
   
   const prePrice = orderDetail.quantity * orderDetail.salePrice
-
+  
   if (voucher.requirement.product.minValue) {
-    if (voucher.requirement.product.minValue > prePrice) return "Gia tri don mua khong du yeu cau"
+    if (voucher.requirement.product.minValue > prePrice) return `${voucher.discountCode}: Gia tri don mua khong du yeu cau`
   }
 
   const idx = listOrderDetail.indexOf(orderDetail);
@@ -62,7 +62,7 @@ const discountByCategory = function (listOrderDetail, voucher) {
     prePriceOfCategory = prePriceOfCategory + order.salePrice * order.quantity
   });
 
-  if (voucher.requirement.category.minValue > prePriceOfCategory) return "Gia tri don mua khong du";
+  if (voucher.requirement.category.minValue > prePriceOfCategory) return `${voucher.discountCode}:  Gia tri don mua khong du`;
 
   let remaining;
   if (voucher.typeDiscount === "direct") {
@@ -120,7 +120,7 @@ const discountByOrder = function (listOrderDetail, voucher) {
     postPrice += order.postPrice;
   });
 
-  if (voucher.requirement.order.minValue > prePriceOfOrder) return "Gia tri don mua khong du";
+  if (voucher.requirement.order.minValue > prePriceOfOrder) return `${voucher.discountCode}: Gia tri don mua khong du`;
 
   let remaining = 0;
   if (voucher.typeDiscount === "direct") remaining = voucher.valueDiscount;
@@ -166,11 +166,13 @@ const discountByOrder = function (listOrderDetail, voucher) {
 }
 
 const checkVoucher = function(voucher) {
-  if (voucher.status === 0) return "Voucher het hieu luc";
-  if (voucher.startTime > Date.now()) return "Van chua den thoi gian su dung Voucher";
-  if (voucher.endTime < Date.now()) return "Voucher da het han";
-  if (voucher.remaining === 0) return "So luong Voucher da het";
-  else return "OK";
+  let message;
+  if (voucher.status === 0) message =  `${voucher.discountCode}: Voucher het hieu luc`;
+  if (voucher.startTime > Date.now()) `${voucher.discountCode}: Van chua den thoi gian su dung Voucher`;
+  if (voucher.endTime < Date.now()) `${voucher.discountCode}: Voucher da het han`;
+  if (voucher.remaining === 0) `${voucher.discountCode}: So luong Voucher da het`;
+  else message = "OK";
+  return message;
 }
 
 module.exports = {

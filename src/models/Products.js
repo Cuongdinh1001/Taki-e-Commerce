@@ -13,19 +13,31 @@ const productSchema = new Schema({
 });
 
 productSchema.statics.getProduct = async function(productId, option={}) {
-  return await this.findOne(ObjectId(productId), option);
+  try {
+    let result = await this.findOne(ObjectId(productId), option);
+    delete result._doc.__v;
+    return result;
+  } catch (error) {
+    console.log("Error in Product: getProduct() - " + error);
+  }
 }
 
 productSchema.statics.addProduct = async function(product) {
-  let { productName, category, unitPrice, salePrice, description } = product;
-  return await this.create({
-    _id: new ObjectId(),
-    productName,
-    category,
-    unitPrice,
-    salePrice,
-    description
-  })
+  try {
+    let { productName, category, unitPrice, salePrice, description } = product;
+    let result = await this.create({
+      _id: new ObjectId(),
+      productName: productName,
+      category: category,
+      unitPrice: unitPrice,
+      salePrice: salePrice,
+      description: description
+    });
+    delete result._doc.__v;
+    return result;
+  } catch (error) {
+    console.log("Error in Product: addProduct() - " + error);
+  }
 }
 
 const productModel = mongoose.model('Product Model', productSchema, 'Products');

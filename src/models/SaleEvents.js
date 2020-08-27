@@ -33,25 +33,39 @@ const saleEventSchema = new Schema({
 });
 
 saleEventSchema.statics.getSaleEvent = async function(saleEventId) {
-  return await this.findOne(ObjectId(saleEventId));
+  try {
+    let result = await this.findOne(ObjectId(saleEventId));
+    delete result._doc.__v;
+    return result;
+  } catch (error) {
+    console.log("Error in SaleEvent: getSaleEvent() - " + error);
+  }
 }
 
 saleEventSchema.statics.addSaleEvent = async function(saleEvent) {
-  let { eventName, typeDiscount, valueDiscount, discountCode, 
-    requirement, numOfVoucher, startTime, endTime, status, description} = saleEvent;
-  return await this.create({
-    _id: new ObjectId(),
-    eventName,
-    typeDiscount,
-    valueDiscount,
-    discountCode,
-    requirement,
-    numOfVoucher,
-    remaining: numOfVoucher.numOfVoucher,
-    startTime,
-    endTime,
-    status, description
-  });
+  try {
+    let { eventName, typeDiscount, valueDiscount, discountCode, 
+      requirement, numOfVoucher, startTime, endTime, status, description} = saleEvent;
+    let result = await this.create({
+      _id: new ObjectId(),
+      eventName: eventName,
+      typeDiscount: typeDiscount,
+      valueDiscount: valueDiscount,
+      discountCode: discountCode,
+      requirement: requirement,
+      numOfVoucher: numOfVoucher,
+      remaining: numOfVoucher.numOfVoucher,
+      startTime: startTime,
+      endTime: endTime,
+      status: status,
+      description: description
+    });
+    delete result._doc.__v;
+    return result;
+  } catch (error) {
+    console.log("Error in SaleEvent: addSaleEvent() - " + error);
+  }
+
 }
 
 saleEventSchema.statics.updateRemaining = async function(saleEventId, remaining) {
