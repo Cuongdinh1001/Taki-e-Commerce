@@ -1,10 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const dotenv = require('dotenv').config();
 
 const app = express();
 
-const mongodb_uri = "mongodb+srv://cuongdinh1001:KaitoKid1001@cluster0.4b3lu.mongodb.net/Demo?retryWrites=true&w=majority";
+const DB_USERNAME = process.env.DB_ADMIN_USERNAME;
+const DB_PASSWORD = process.env.DB_ADMIN_PASSWORD;
+const DB = process.env.DB_ADMIN_DATABASE;
+
+const mongodb_uri = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB}`;
+
 mongoose.connect(
   mongodb_uri,
   {
