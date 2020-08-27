@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
+import { Schema as _Schema, Types, model } from 'mongoose';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
 
 
 const productSchema = new Schema({
@@ -40,7 +40,7 @@ productSchema.statics.addProduct = async function(product) {
   }
 }
 
-const productModel = mongoose.model('Product Model', productSchema, 'Products');
+const productModel = model('Product Model', productSchema, 'Products');
 
 
-module.exports = productModel;
+export default productModel;

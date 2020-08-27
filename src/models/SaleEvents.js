@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
+import { Schema as _Schema, Types, model } from 'mongoose';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
 
 
 
@@ -76,6 +76,6 @@ saleEventSchema.statics.findVoucher = async function(code, option = {}) {
   return await this.findOne({discountCode: code}, option);
 }
 
-const saleEventModel = mongoose.model('Sale Event Model', saleEventSchema, 'SaleEvents');
+const saleEventModel = model('Sale Event Model', saleEventSchema, 'SaleEvents');
 
-module.exports = saleEventModel;
+export default saleEventModel;

@@ -1,7 +1,7 @@
-const express = require('express');
-const productModel = require('../../models/Products')
+import { Router } from 'express';
+import productModel from '../../models/Products';
 
-const router = express.Router();
+const router = Router();
 
 router.get('/:productId', async (req, res) => {
   try {
@@ -21,7 +21,7 @@ router.post('/add', async (req, res) => {
     res.status(200).send({
       message: "Product added successfully",
       request: {
-        url: `http://localhost:3000/product/${result._id}`,
+        url: `${process.env.L_HOST}/product/${result._id}`,
         method: 'GET'
       }
     });
@@ -30,4 +30,4 @@ router.post('/add', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

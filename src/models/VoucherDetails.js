@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
+import { Schema as _Schema, Types, model } from 'mongoose';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
 
 
 const voucherDetailSchema = Schema({
@@ -12,6 +12,6 @@ const voucherDetailSchema = Schema({
   voucher: [{ type: ObjectId, ref: 'Vouchers'}]
 });
 
-const voucherDetailModel = mongoose.model('Order Model', voucherDetailSchema, 'Orders');
+const voucherDetailModel = model('Order Model', voucherDetailSchema, 'Orders');
 
-module.exports = voucherDetailModel;
+export default voucherDetailModel;

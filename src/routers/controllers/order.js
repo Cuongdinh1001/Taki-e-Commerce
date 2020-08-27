@@ -1,11 +1,11 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const orderModel = require('../../models/Orders');
-const orderDetailModel = require('../../models/OrderDetails');
+import { Router } from 'express';
+import { Types } from 'mongoose';
+import orderModel from '../../models/Orders';
+import orderDetail from '../../models/OrderDetails';
 
-const router = express.Router();
+const router = Router();
 
-const ObjectId = mongoose.Types.ObjectId;
+const ObjectId = Types.ObjectId;
 
 router.get('/', async(req, res) =>{
   let lstOrder = await orderModel.getManyOrder(req.query.userId);
@@ -38,7 +38,7 @@ router.get('/:orderId', async (req, res) => {
 
     for (let idx = 0; idx < lstOrderDetailId.length; idx++) {
       const orderDetailId = lstOrderDetailId[idx];
-      let detail = await orderDetailModel.getOrderDetail(orderDetailId);
+      let detail = await orderDetail.getOrderDetail(orderDetailId);
 
       let orderDetail = Object.assign({}, detail)._doc;
 
@@ -48,7 +48,7 @@ router.get('/:orderId', async (req, res) => {
         const voucherId =voucher._id;
         delete voucher._id;
         voucher.request = {
-          url: `http://localhost:3000/saleevent/${voucherId}`,
+          url: `${process.env.L_HOST}/saleevent/${voucherId}`,
           method: 'GET'
         };
         orderDetail.voucher[jdx] = voucher;
@@ -60,4 +60,4 @@ router.get('/:orderId', async (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;
