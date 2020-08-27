@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const crypto = require('crypto');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
+import { Schema as _Schema, Types, model } from 'mongoose';
+import { createHash } from 'crypto';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
 
 
 const userSchema = new Schema({
@@ -26,7 +26,7 @@ userSchema.statics.createUser = async function (user) {
       typeAccount: 'Dong',
       dateRegistration: Date.now(),
       userName: userName,
-      userPassword: crypto.createHash('sha1').update(userPassword).digest('hex')
+      userPassword: createHash('sha1').update(userPassword).digest('hex')
     });
     delete result._doc.userPassword;
     delete result._doc.__v;
@@ -36,6 +36,6 @@ userSchema.statics.createUser = async function (user) {
   }
 }
 
-const userModel = mongoose.model('User Model', userSchema, 'Users');
+const userModel = model('User Model', userSchema, 'Users');
 
-module.exports = userModel;
+export default userModel;

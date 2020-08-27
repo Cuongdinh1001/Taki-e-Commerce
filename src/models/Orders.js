@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const userModel = require('./Users');
-const orderDetailModel = require('./OrderDetails');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
+import { Schema as _Schema, Types, model as _model } from 'mongoose';
+import userModel from './Users';
+import orderDetailModel from './OrderDetails';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
 
 
 const orderSchema = new Schema({
@@ -33,6 +33,6 @@ orderSchema.statics.getManyOrder = async function(userId) {
   return await this.find({owner: ObjectId(userId)}, {__v: 0, orderDetail: 0});
 }
 
-const orderModel = mongoose.model('Order Model', orderSchema, 'Orders');
+const orderModel = _model('Order Model', orderSchema, 'Orders');
 
-module.exports = orderModel;
+export default orderModel;

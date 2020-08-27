@@ -1,16 +1,14 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const productModel = require('../../models/Products')
-const userModel = require('../../models/Users');
-const saleEventModel = require('../../models/SaleEvents');
-const OrderModel = require('../../models/Orders');
-const calculateDiscount = require('../../tools/calculateDiscount');
-const orderModel = require('../../models/Orders');
-const orderDetailModel = require('../../models/OrderDetails');
+import { Router } from 'express';
+import { Types } from 'mongoose';
+import productModel from '../../models/Products';
+import saleEventModel from '../../models/SaleEvents';
+import { discountByProduct, discountByCategory, discountByOrder } from '../../tools/calculateDiscount';
+import orderModel from '../../models/Orders';
+import orderDetailModel from '../../models/OrderDetails';
 
-const ObjectId = mongoose.Types.ObjectId;
+const ObjectId = Types.ObjectId;
 
-const router = express.Router();
+const router = Router();
 
 router.post('/', async (req, res) => {
   let cart = req.body;
@@ -18,14 +16,24 @@ router.post('/', async (req, res) => {
   let userId = cart.userId;
   let lstProducts = cart.listProduct;
   let lstDiscountCode = cart.listDiscountCode;
+  let error = false;
 
   try {
 
     let lstVoucher = [];
 
     for (let idx = 0; idx < lstDiscountCode.length; idx++) {
-      let code = lstDiscountCode[idx];
-      lstVoucher.push(await saleEventModel.findVoucher(code, { description: 0, eventName: 0, __v: 0 }));
+      const code = lstDiscountCode[idx];
+      const voucher = await saleEventModel.findVoucher(code, { description: 0, eventName: 0, __v: 0 });
+      if (voucher) lstVoucher.push(voucher);
+      else {
+        res.status(404).send({
+          message: `${voucher.discountCode} not found`
+        });
+        error = true;
+        return;
+      }
+      
     }
 
     for (let idx = 0; idx < lstProducts.length; idx++) {
@@ -41,33 +49,41 @@ router.post('/', async (req, res) => {
       lstOrderDetail.push(detail);
     }
 
-    lstVoucher.forEach(voucher => {
+    for (let idx = 0; idx < lstVoucher.length; idx++) {
+      const voucher = lstVoucher[idx];
       let message;
       if (voucher.requirement.product.productId) {
-        message = calculateDiscount.discountByProduct(lstOrderDetail, voucher);
+        message = discountByProduct(lstOrderDetail, voucher);
         lstVoucher.splice(lstVoucher.indexOf(voucher), 1);
 
-        if (message !== "OK") res.status(500).send({
-          message: message
-        });
+        if (message !== "OK") {
+          res.status(400).send({
+            message: message
+          });
+          return;
+        }
       }
-    });
+    }
 
-    lstVoucher.forEach(voucher => {
+    for (let idx = 0; idx < lstVoucher.length; idx++) {
+      const voucher = lstVoucher[idx];
       let message;
 
       if (voucher.requirement.category.type) {
-        message = calculateDiscount.discountByCategory(lstOrderDetail, voucher);
+        message = discountByCategory(lstOrderDetail, voucher);
       }
 
       else if (voucher.requirement.order) {
-        message = calculateDiscount.discountByOrder(lstOrderDetail, voucher);
+        message = discountByOrder(lstOrderDetail, voucher);
       }
 
-      if (message !== "OK") res.status(400).send({
-        message
-      });
-    });
+      if (message !== "OK") {
+        res.status(400).send({
+          message: message
+        });
+        return;
+      }
+    }
 
     let totalPrice = 0;
     lstOrderDetail.forEach(order => {
@@ -79,7 +95,7 @@ router.post('/', async (req, res) => {
       orderValue: totalPrice
     }
 
-    res.send(order);
+    res.send(order)
 
 
     router.post('/ok', async (req, res) => {
@@ -91,10 +107,10 @@ router.post('/', async (req, res) => {
           lstOrderId.push(orderDetailId)
           delete orderDetail.productName;
           delete orderDetail.category;
-  
+
           await orderDetailModel.createOrderDetail(orderDetail);
         });
-  
+
         const result = await orderModel.createOrder({
           owner: userId,
           orderValue: order.orderValue,
@@ -103,7 +119,7 @@ router.post('/', async (req, res) => {
         res.send({
           message: "Order was created",
           request: {
-            url: `http://localhost:3000/order/${result._id}`,
+            url: `${process.env.L_HOST}/order/${result._id}`,
             method: "GET"
           }
         })
@@ -111,7 +127,7 @@ router.post('/', async (req, res) => {
         console.log("Error in shpping cart: router.post(ok) - " + error);
       }
     })
-    
+
   } catch (error) {
     console.log("Error in shpping cart: router.post() - " + error);
     res.status(500).send({
@@ -121,4 +137,4 @@ router.post('/', async (req, res) => {
 });
 
 
-module.exports = router;
+export default router;

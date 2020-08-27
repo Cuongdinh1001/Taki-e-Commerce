@@ -1,4 +1,4 @@
-const discountByProduct = function (listOrderDetail, voucher) {
+export const discountByProduct = function (listOrderDetail, voucher) {
   let message = checkVoucher(voucher);
   if (message !== "OK") return message;
 
@@ -48,7 +48,7 @@ const discountByProduct = function (listOrderDetail, voucher) {
   return message;
 };
 
-const discountByCategory = function (listOrderDetail, voucher) {
+export const discountByCategory = function (listOrderDetail, voucher) {
   let message = checkVoucher(voucher);
   if (message !== "OK") return message;
 
@@ -109,15 +109,13 @@ const discountByCategory = function (listOrderDetail, voucher) {
   return message;
 }
 
-const discountByOrder = function (listOrderDetail, voucher) {
+export const discountByOrder = function (listOrderDetail, voucher) {
   let message = checkVoucher(voucher);
   if (message !== "OK") return message;
 
   let prePriceOfOrder = 0;
-  let postPrice = 0;
   listOrderDetail.forEach(order => {
     prePriceOfOrder += order.salePrice * order.quantity;
-    postPrice += order.postPrice;
   });
 
   if (voucher.requirement.order.minValue > prePriceOfOrder) return `${voucher.discountCode}: Gia tri don mua khong du`;
@@ -173,10 +171,4 @@ const checkVoucher = function(voucher) {
   if (voucher.remaining === 0) `${voucher.discountCode}: So luong Voucher da het`;
   else message = "OK";
   return message;
-}
-
-module.exports = {
-  discountByProduct: discountByProduct,
-  discountByCategory: discountByCategory,
-  discountByOrder: discountByOrder
 }

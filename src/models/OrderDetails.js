@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const productModel = require('./Products');
-const Schema = mongoose.Schema;
-const ObjectId = mongoose.Types.ObjectId;
-const SaleEventModel = require('./SaleEvents')
+import { Schema as _Schema, Types, model as _model } from 'mongoose';
+import productModel from './Products';
+const Schema = _Schema;
+const ObjectId = Types.ObjectId;
+import SaleEventModel from './SaleEvents';
 
 
 const voucherSchema = Schema({
@@ -34,6 +34,6 @@ orderDetailSchema.statics.getOrderDetail = async function(orderDetailId) {
     .populate({path: 'voucher.voucherId', model: SaleEventModel, select: 'eventName discountCode description'});
 }
 
-const orderDetailModel = mongoose.model('Order Detail Model', orderDetailSchema, 'OrderDetails');
+const orderDetailModel = _model('Order Detail Model', orderDetailSchema, 'OrderDetails');
 
-module.exports = orderDetailModel;
+export default orderDetailModel;

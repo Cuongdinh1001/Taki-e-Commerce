@@ -1,8 +1,7 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const userModel = require('../../models/Users');
+import { Router } from 'express';
+import userModel from '../../models/Users';
 
-const router = express.Router();
+const router = Router();
 
 
 router.get('/:userId', async(req, res) => {
@@ -19,7 +18,7 @@ router.post('/create', async(req, res) => {
     res.status(200).send({
       message: 'User account was created',
       request: {
-        url: `http://localhost:3000/user/${userId}`,
+        url: `${process.env.L_HOST}/user/${userId}`,
         method: 'GET'
       }
     });
@@ -29,4 +28,4 @@ router.post('/create', async(req, res) => {
   
 });
 
-module.exports = router;
+export default router;

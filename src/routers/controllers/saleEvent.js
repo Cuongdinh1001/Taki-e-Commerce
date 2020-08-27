@@ -1,8 +1,8 @@
-const express = require('express');
-const saleEventModel = require('../../models/SaleEvents');
+import { Router } from 'express';
+import saleEventModel from '../../models/SaleEvents';
 
 
-const router = express.Router();
+const router = Router();
 
 router.get('/:saleEventId', async (req, res) => {
   try {
@@ -23,7 +23,7 @@ router.post('/add', async (req, res) => {
     res.status(200).send({
       message: "Sale Event added successfully",
       request: {
-        url: `http://localhost:3000/saleevent/${result._id}`,
+        url: `${process.env.L_HOST}/saleevent/${result._id}`,
         method: 'GET'
       }
     });
@@ -32,4 +32,4 @@ router.post('/add', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

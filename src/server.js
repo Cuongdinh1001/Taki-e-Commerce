@@ -1,7 +1,6 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const dotenv = require('dotenv').config();
+import express from 'express';
+import { connect } from 'mongoose';
+import { json, urlencoded } from 'body-parser';
 
 const app = express();
 
@@ -11,7 +10,7 @@ const DB = process.env.DB_ADMIN_DATABASE;
 
 const mongodb_uri = `mongodb+srv://${DB_USERNAME}:${DB_PASSWORD}@${DB}`;
 
-mongoose.connect(
+connect(
   mongodb_uri,
   {
     useNewUrlParser: true,
@@ -25,15 +24,15 @@ mongoose.connect(
       console.log("Connect");
   });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 app.get('/', (_req, res) => {
   res.send('OK');
 });
 
-app.use('/', require('./routers/routes'));
+app.use('/', require('./routers/routes').default);
 
-app.listen(3000, () => {
+app.listen(process.env.PORT, () => {
   console.log("server is listening at port 3000 ...");
 });
