@@ -5,30 +5,44 @@ import orderDetailModel from '../../models/OrderDetails';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
-  const lstOrder = await orderModel.getManyOrder(req.query.userId);
-  const result = [];
+router.post('/', async (req, res) => {
 
-  lstOrder.forEach((order) => {
-    order = order.toObject();
-    const orderId = order._id;
-    delete order._id;
-    order.request = {
-      url: `http://localhost:3000/order/${orderId}`,
-      method: 'GET'
-    };
-    result.push(order);
-  });
+  try {
+    const lstOrder = await orderModel.getManyOrder(req.body.userId);
+    const result = [];
+    if (lstOrder) {
+      for (let idx = 0; idx < lstOrder.length; idx++) {
+        const order = lstOrder[idx];
+        order = order.toObject();
+        const orderId = order._id;
+        delete order._id;
+        order.request = {
+          url: `http://localhost:3000/order/${orderId}`,
+          method: 'GET'
+        };
+        result.push(order);
+      }
+    }
 
-  res.status(200).send(result);
+    res.status(200).send(result);
+  } catch (error) {
+    console.log(`Error in order - getManyOrder(): ${error}`);
+  }
+  
 });
 
 router.get('/:orderId', async (req, res) => {
   try {
     const result = await orderModel.getOrder(req.params.orderId);
-    res.status(200).send(result);
+    if (result) {
+      res.status(200).send(result);
+    } else {
+      res.status(404).send({
+        message: `${req.params.orderId} not Found!`
+      })
+    }
   } catch (error) {
-    
+    console.log(`Error on router.get(orderId): ${error}`);
   }
 
   router.get('/:orderId/detail', async (cont_req, res) => {

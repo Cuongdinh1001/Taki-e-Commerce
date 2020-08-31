@@ -21,6 +21,7 @@ orderSchema.statics.getOrder = async function (orderId) {
     return result;
   } catch (error) {
     console.log(`Error in Order Model, getOrder(): ${error}`);
+    return;
   }
 };
 
@@ -46,6 +47,7 @@ orderSchema.statics.getManyOrder = async function (userId) {
     return result;
   } catch (error) {
     console.log(`Error in Order Model, getManyOrder(): ${error}`);
+    return;
   }
 };
 

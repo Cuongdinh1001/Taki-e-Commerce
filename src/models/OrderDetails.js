@@ -28,6 +28,7 @@ orderDetailSchema.statics.createOrderDetail = async function (orderDetail) {
     return result;
   } catch (error) {
     console.log(`Error in Order Detail Model, method createOrderDetail: ${error}`);
+    return;
   }
 };
 
