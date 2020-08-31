@@ -1,8 +1,8 @@
 import { Schema as _Schema, Types, model } from 'mongoose';
 import { createHash } from 'crypto';
-const Schema = _Schema;
-const ObjectId = Types.ObjectId;
 
+const Schema = _Schema;
+const { ObjectId } = Types;
 
 const userSchema = new Schema({
   _id: { type: ObjectId },
@@ -14,27 +14,28 @@ const userSchema = new Schema({
 });
 
 userSchema.statics.getUser = async function (userId) {
-  return await this.findOne(ObjectId(userId), { __v: 0, userPassword: 0 });
-}
+  let result = await this.findOne(ObjectId(userId));
+  result = result.toObject();
+  delete result.userPassword;
+  delete result.__v;
+  return result;
+};
 
 userSchema.statics.createUser = async function (user) {
   try {
-    let { userFullName, userName, userPassword } = user;
     let result = await this.create({
       _id: new ObjectId(),
-      userFullName: userFullName,
+      userFullName: user.userFullName,
       typeAccount: 'Dong',
       dateRegistration: Date.now(),
-      userName: userName,
-      userPassword: createHash('sha1').update(userPassword).digest('hex')
+      userName: user.userFullName,
+      userPassword: createHash('sha1').update(user.userPassword).digest('hex')
     });
-    delete result._doc.userPassword;
-    delete result._doc.__v;
     return result;
   } catch (error) {
-    console.log("Error in User: createUser() - " + error);
+    console.log(`Error in User: createUser() - ${error}`);
   }
-}
+};
 
 const userModel = model('User Model', userSchema, 'Users');
 

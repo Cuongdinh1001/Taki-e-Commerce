@@ -6,21 +6,19 @@ import { discountByProduct, discountByCategory, discountByOrder } from '../../to
 import orderModel from '../../models/Orders';
 import orderDetailModel from '../../models/OrderDetails';
 
-const ObjectId = Types.ObjectId;
+const { ObjectId } = Types;
 
 const router = Router();
 
 router.post('/', async (req, res) => {
-  let cart = req.body;
-  let lstOrderDetail = [];
-  let userId = cart.userId;
-  let lstProducts = cart.listProduct;
-  let lstDiscountCode = cart.listDiscountCode;
-  let error = false;
+  const cart = req.body;
+  const lstOrderDetail = [];
+  const { userId } = cart;
+  const lstProducts = cart.listProduct;
+  const lstDiscountCode = cart.listDiscountCode;
 
   try {
-
-    let lstVoucher = [];
+    const lstVoucher = [];
 
     for (let idx = 0; idx < lstDiscountCode.length; idx++) {
       const code = lstDiscountCode[idx];
@@ -28,25 +26,31 @@ router.post('/', async (req, res) => {
       if (voucher) lstVoucher.push(voucher);
       else {
         res.status(404).send({
-          message: `${voucher.discountCode} not found`
+          message: `${code} not found`
         });
-        error = true;
         return;
       }
-      
     }
 
     for (let idx = 0; idx < lstProducts.length; idx++) {
-      let productDetail = await productModel.getProduct(lstProducts[idx].productId, { unitPrice: 0, description: 0 })
-      let detail = Object.assign({},
-        productDetail._doc,
-        {
+      const productDetail = await productModel.getProduct(lstProducts[idx].productId);
+      if (!productDetail) {
+        res.status(404).send({
+          message: `${lstProducts[idx].productId} not found`
+        });
+        return;
+      }
+      else {
+        delete productDetail.unitPrice;
+        const detail = {
+          ...productDetail,
           productId: productDetail._id,
           quantity: lstProducts[idx].quantity,
           postPrice: productDetail.salePrice * lstProducts[idx].quantity
-        });
-      delete detail._id;
-      lstOrderDetail.push(detail);
+        };
+        delete detail._id;
+        lstOrderDetail.push(detail);
+      }
     }
 
     for (let idx = 0; idx < lstVoucher.length; idx++) {
@@ -56,9 +60,9 @@ router.post('/', async (req, res) => {
         message = discountByProduct(lstOrderDetail, voucher);
         lstVoucher.splice(lstVoucher.indexOf(voucher), 1);
 
-        if (message !== "OK") {
+        if (message !== 'OK') {
           res.status(400).send({
-            message: message
+            message
           });
           return;
         }
@@ -71,40 +75,37 @@ router.post('/', async (req, res) => {
 
       if (voucher.requirement.category.type) {
         message = discountByCategory(lstOrderDetail, voucher);
-      }
-
-      else if (voucher.requirement.order) {
+      } else if (voucher.requirement.order) {
         message = discountByOrder(lstOrderDetail, voucher);
       }
 
-      if (message !== "OK") {
+      if (message !== 'OK') {
         res.status(400).send({
-          message: message
+          message
         });
         return;
       }
     }
 
     let totalPrice = 0;
-    lstOrderDetail.forEach(order => {
+    lstOrderDetail.forEach((order) => {
       totalPrice += order.postPrice;
     });
 
     const order = {
       orderDetail: lstOrderDetail,
       orderValue: totalPrice
-    }
+    };
 
-    res.send(order)
+    res.send(order);
 
-
-    router.post('/ok', async (req, res) => {
+    router.post('/ok', async (cont_req, res) => {
       try {
-        let lstOrderId = [];
+        const lstOrderId = [];
         lstOrderDetail.forEach(async (orderDetail) => {
           const orderDetailId = new ObjectId();
           orderDetail._id = orderDetailId;
-          lstOrderId.push(orderDetailId)
+          lstOrderId.push(orderDetailId);
           delete orderDetail.productName;
           delete orderDetail.category;
 
@@ -115,26 +116,24 @@ router.post('/', async (req, res) => {
           owner: userId,
           orderValue: order.orderValue,
           orderDetail: lstOrderId
-        })
+        });
         res.send({
-          message: "Order was created",
+          message: 'Order was created',
           request: {
             url: `${process.env.L_HOST}/order/${result._id}`,
-            method: "GET"
+            method: 'GET'
           }
-        })
+        });
       } catch (error) {
-        console.log("Error in shpping cart: router.post(ok) - " + error);
+        console.log(`Error in shpping cart: router.post(ok) - ${error}`);
       }
-    })
-
+    });
   } catch (error) {
-    console.log("Error in shpping cart: router.post() - " + error);
+    console.log(`Error in shpping cart: router.post() - ${error}`);
     res.status(500).send({
-      Error: "Error"
-    })
+      Error: 'Error'
+    });
   }
 });
-
 
 export default router;

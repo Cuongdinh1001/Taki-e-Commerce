@@ -5,28 +5,36 @@ const router = Router();
 
 router.get('/:productId', async (req, res) => {
   try {
-    let result = await productModel.getProduct(req.params.productId);
-    delete result._doc._id;
-    res.status(200).send(result);
+    const result = await productModel.getProduct(req.params.productId);
+    if (result) {
+      delete result._id;
+      res.status(200).send(result);
+    }
+    else res.status(404).send({
+      message: "Not found product"
+    })
+    return;
   } catch (error) {
-    console.log("Error in product: router.get() - " + error);
+    console.log(`Error in product: router.get() - ${error}`);
+    return;
   }
 });
 
 router.post('/add', async (req, res) => {
   try {
-    let product = req.body;
-    let result = await productModel.addProduct(product);
-    console.log(result);
+    const product = req.body;
+    const result = await productModel.addProduct(product);
     res.status(200).send({
-      message: "Product added successfully",
+      message: 'Product added successfully',
       request: {
         url: `${process.env.L_HOST}/product/${result._id}`,
         method: 'GET'
       }
     });
+    return;
   } catch (error) {
-    console.log("Error in product: router.post() - " + error);
+    console.log(`Error in product: router.post() - ${error}`);
+    return;
   }
 });
 

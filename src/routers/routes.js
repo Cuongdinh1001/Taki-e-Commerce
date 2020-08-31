@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 const router = Router();
 
 router.use('/user', require('./controllers/user').default);
